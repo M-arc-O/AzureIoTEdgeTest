@@ -11,9 +11,9 @@
             "loggingOptions": "",
             "registryCredentials": {
               "marcosregestry": {
-                "username": "marcosregestry",
-                "password": "wYlwJKutaythO8l5Ns6+bh0mUHtSF9p+",
-                "address": "marcosregestry.azurecr.io"
+                "username": "<YourInfoHere>",
+                "password": "<YourInfoHere>",
+                "address": "<YourInfoHere>"
               }
             }
           }
