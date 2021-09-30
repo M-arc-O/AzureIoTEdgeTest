@@ -1,0 +1,127 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.1",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "marcosregestry": {
+                "username": "marcosregestry",
+                "password": "wYlwJKutaythO8l5Ns6+bh0mUHtSF9p+",
+                "address": "marcosregestry.azurecr.io"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.2",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.2",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            }
+          }
+        },
+        "modules": {
+          "influxdb": {
+            "version": "1.0.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "influxdb:1.8",
+              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/var/influxdb:/var/lib/influxdb\"],\"PortBindings\":{\"8086/tcp\":[{\"HostPort\":\"8086\"}]}}}"
+            }
+          },
+          "grafana": {
+            "version": "1.0.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "GF_INSTALL_PLUGINS": {
+                "value": "grafana-clock-panel 1.0.1,grafana-simple-json-datasource 1.3.5"
+              },
+              "GF_SECURITY_ADMIN_PASSWORD": {
+                "value": "12345678"
+              }
+            },
+            "settings": {
+              "image": "grafana/grafana:latest-ubuntu",
+              "createOptions": "{\"ExposedPorts\":{\"3000/tcp\":{}},\"HostConfig\":{\"Binds\":[\"/var/grafana:/var/lib/grafana\"],\"PortBindings\":{\"3000/tcp\":[{\"HostPort\":\"3000\"}]}}}"
+            }
+          },
+          "ShipShapeShipCore": {
+            "version": "1.0.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "marcosregestry.azurecr.io/shipshapeshipcore:0.1.0-arm32v7",
+              "createOptions": "{}"
+            }
+          },
+          "ShipShapeShipSensors": {
+            "version": "1.0.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "marcosregestry.azurecr.io/shipshapeshipsensors:0.1.1-arm32v7",
+              "createOptions": "{\"HostConfig\":{\"Devices\":[{\"PathOnHost\":\"/dev/ttyAMA0\",\"PathInContainer\":\"/dev/ttyAMA0\",\"CgroupPermissions\":\"rwm\"}]}}"
+            }
+          },
+          "ShipShapeShipInfluxWriter": {
+            "version": "1.0.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "marcosregestry.azurecr.io/shipshapeshipinfluxwriter:0.0.9-arm32v7",
+              "createOptions": "{}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.2",
+        "routes": {
+          "ShipShapeShipCoreToIoTHub": "FROM /messages/modules/ShipShapeShipCore/outputs/* INTO $upstream",
+          "ShipShapeShipSensorsToToCore": "FROM /messages/modules/ShipShapeShipSensors/outputs/* INTO BrokeredEndpoint(\"/modules/ShipShapeShipCore/inputs/inputFromSensors\")",
+          "ShipShapeShipSensorsToInfluxWriter": "FROM /messages/modules/ShipShapeShipSensors/outputs/* INTO BrokeredEndpoint(\"/modules/ShipShapeShipInfluxWriter/inputs/inputFromSensors\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "ShipShapeShipCore": {
+      "properties.desired": {
+        "SendData": false,
+        "SendInterval": 5
+      }
+    },
+    "ShipShapeShipeSensors": {
+      "properties.desired": {
+        "GetSensorData": true,
+        "PortName": "/dev/ttyAMA0",
+        "BaudRate": 9600
+      }
+    }
+  }
+}
