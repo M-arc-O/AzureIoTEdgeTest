@@ -6,6 +6,7 @@ Raspberry Pi 2B
 Arduino Uno
 SparkFunMPL3115A2
 SparkFunLSM9DS1
+SPARKFUN LOGIC LEVEL CONVERTER - BI-DIRECTIONAL
 
 The Sprakfun sensor boards are connected to the Arduino by I2C interface the Arduino is connected to the raspberry pi by serial port. The software in the SensorController.ino file gets the values from the sensor and writes them to the serial port.
 
